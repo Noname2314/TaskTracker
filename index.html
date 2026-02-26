@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h1 class="logo">Task Tracker</h1>
+
+        <button class="nav-btn active" onclick="switchSection('home')">Главная</button>
+        <button class="nav-btn" onclick="switchSection('bp')">BP</button>
+        <button class="nav-btn" onclick="switchSection('timer')">Таймер</button>
+        <button class="nav-btn" onclick="switchSection('clubs')">Клубы</button>
+        <button class="nav-btn" onclick="switchSection('guides')">Гайды</button>
+        <button class="nav-btn" onclick="switchSection('useful')">Полезное</button>
+        <button class="nav-btn" onclick="switchSection('macros')">Макросы</button>
+        <button class="nav-btn" onclick="switchSection('settings')">Настройки</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- HOME -->
+        <div id="home" class="section active">
+            <h2>Главная</h2>
+        </div>
+
+        <!-- BP -->
+        <div id="bp" class="section">
+            <h2>Battle Pass</h2>
+
+            <div class="bp-header">
+
+                <div>
+                    <div class="bp-big">
+                        <span id="bp-total">0</span> BP
+                    </div>
+
+                    <div class="bp-bar">
+                        <div class="bp-fill" id="bp-fill"></div>
+                    </div>
+                </div>
+
+                <label class="vip-toggle">
+                    <input type="checkbox" onchange="toggleVip()">
+                    VIP x2
+                </label>
+
+            </div>
+
+            <div class="bp-tabs">
+                <button class="bp-tab active" onclick="switchBP('solo', this)">Соло задания</button>
+                <button class="bp-tab" onclick="switchBP('pair', this)">Парные задания</button>
+                <button class="bp-tab" onclick="switchBP('faction', this)">Фракционные</button>
+            </div>
+
+            <div id="bp-container"></div>
+        </div>
+
+        <!-- TIMER -->
+        <div id="timer" class="section">
+            <h2>Таймер</h2>
+        </div>
+
+        <!-- CLUBS -->
+        <div id="clubs" class="section">
+            <h2>Клубы</h2>
+
+                <div class="club-switcher">
+            <button class="club-btn active" onclick="switchClub('merryweather', this)">Merryweather</button>
+            <button class="club-btn" onclick="switchClub('rednecks', this)">Rednecks</button>
+            <button class="club-btn" onclick="switchClub('carmeet', this)">Car Meet</button>
+            <button class="club-btn" onclick="switchClub('epsilon', this)">Epsilon</button>
+        </div>
+
+        <div class="club-content active" id="merryweather">
+            Контент Merryweather
+        </div>
+
+        <div class="club-content" id="rednecks">
+            Контент Rednecks
+        </div>
+
+        <div class="club-content" id="carmeet">
+            Контент Car Meet
+        </div>
+
+        <div class="club-content" id="epsilon">
+            Контент Epsilon
+        </div>
+        </div>
+
+        <!-- GUIDES -->
+        <div id="guides" class="section">
+            <h2>Гайды</h2>
+        </div>
+
+        <!-- USEFUL -->
+        <div id="useful" class="section">
+            <h2>Полезное</h2>
+        </div>
+
+        <!-- MACROS -->
+        <div id="macros" class="section">
+            <h2>Макросы</h2>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="settings" class="section">
+            <h2>Настройки</h2>
+        </div>
+
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

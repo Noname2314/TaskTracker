@@ -1,0 +1,450 @@
+/* =========================
+   ОСНОВА
+========================= */
+
+body {
+    margin: 0;
+    background: #14141c; /* тот же цвет что у sidebar */
+    color: #f0f0f0;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.app {
+    display: flex;
+    height: 100vh;
+}
+
+/* =========================
+   MODERN LAUNCHER SIDEBAR
+========================= */
+
+.sidebar {
+    width: 190px;
+    background: rgba(20,20,28,0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border-right: 1px solid rgba(255,255,255,0.05);
+    padding: 25px 15px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
+}
+
+/* ===== LOGO ===== */
+
+.sidebar .logo {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    letter-spacing: 1.5px;
+
+    background: linear-gradient(90deg, #ff9500, #ffb84d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    text-shadow: 0 0 12px rgba(255,149,0,0.6);
+}
+
+/* =========================
+   SIDEBAR (Чёткое разделение)
+========================= */
+
+.sidebar {
+    width: 190px;
+    background: #14141c;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== ЛОГО ===== */
+
+.sidebar .logo {
+    text-align: center;
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #ff9500;
+    text-shadow: 0 0 8px rgba(255,149,0,0.6);
+}
+
+/* ===== КНОПКИ ===== */
+
+.sidebar button {
+    position: relative;
+    background: #1c1c26;
+    border: 1px solid #22232c;
+    color: #aaa;
+
+    padding: 11px 14px;
+    margin-bottom: 6px;
+
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: left;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.sidebar button:hover {
+    background: #242432;
+    color: white;
+    border-color: #2d2e3a;
+}
+
+.sidebar button.active {
+    background: #1f1f2c;
+    color: #ff9500;
+    border-color: #ff9500;
+}
+
+/* Левая оранжевая линия */
+
+.sidebar button::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 15%;
+    width: 4px;
+    height: 70%;
+    background: #ff9500;
+    border-radius: 0 4px 4px 0;
+    transform: scaleY(0);
+    transition: 0.2s ease;
+}
+
+.sidebar button.active::before {
+    transform: scaleY(1);
+}
+
+/* Левая активная полоска */
+
+.sidebar button::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+
+    background: #ff9500;
+    transform: scaleY(0);
+    transition: transform 0.25s ease;
+}
+
+.sidebar button.active::before {
+    transform: scaleY(1);
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+/* =========================
+   TABS
+========================= */
+
+.tab {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================
+   CLUB TABS (РАСТЯНУТЫЕ)
+========================= */
+
+.club-tabs {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+/* Кнопки занимают всё пространство */
+
+.club-tab {
+    flex: 1;
+    background: #1c1c26;
+    border: 1px solid #2a2a35;
+
+    color: #ccc;
+    padding: 10px 0;
+
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+
+    transition: all 0.25s ease;
+}
+
+/* Hover — лёгкое бело-серое свечение */
+
+.club-tab:hover {
+    color: white;
+    border-color: #444;
+    box-shadow:
+        0 0 8px rgba(255,255,255,0.15),
+        0 0 16px rgba(200,200,200,0.1);
+}
+
+/* Активный клуб */
+
+.club-tab.active {
+    background: #c53030;
+    color: white;
+    border-color: #ff6a6a;
+
+    box-shadow:
+        0 0 10px rgba(255,255,255,0.25),
+        0 0 20px rgba(255,0,0,0.4);
+}
+
+.club-content {
+    display: none;
+}
+
+.club-content.active {
+    display: block;
+}
+
+/* =========================
+   TASK CARDS
+========================= */
+
+.task-card {
+    background: #1f1f1f;
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 0 15px #00000088;
+    transition: 0.3s;
+}
+
+.task-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(255,149,0,0.3);
+}
+
+.task-card.completed {
+    border-left: 6px solid #00ff88;
+}
+
+.task-card.failed {
+    border-left: 6px solid #ff4444;
+}
+
+.task-card.progress {
+    border-left: 6px solid #ffaa00;
+}
+
+/* =========================
+   BP СТИЛЬ
+========================= */
+
+.bp-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.bp-total {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ff9500;
+}
+
+.bp-bar {
+    width: 300px;
+    height: 12px;
+    background: #1c1c26;
+    border-radius: 20px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.bp-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff9500, #ffb84d);
+    transition: 0.3s ease;
+}
+
+.bp-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.bp-tab {
+    flex: 1;
+    background: #1c1c26;
+    border: 1px solid #2a2a35;
+    padding: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #ccc;
+    transition: 0.2s;
+}
+
+.bp-tab.active {
+    background: #ff9500;
+    color: black;
+}
+
+.bp-content {
+    display: none;
+}
+
+.bp-content.active {
+    display: block;
+}
+
+/* Карточка BP */
+
+.bp-task {
+    background: #1f1f1f;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #444;
+    transition: 0.2s;
+}
+
+.bp-task.completed {
+    border-left-color: #00ff88;
+    box-shadow: 0 0 12px rgba(0,255,136,0.3);
+}
+
+.bp-task .bp-reward {
+    color: #ff9500;
+    font-weight: 600;
+}
+
+.bp-task input {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+/* ===== ПЕРЕКЛЮЧАТЕЛЬ КЛУБОВ ===== */
+
+.club-switcher {
+    display: flex;
+    width: 100%;
+    background: #111827;
+    padding: 6px;
+    border-radius: 14px;
+    gap: 6px;
+    margin-bottom: 25px;
+
+    border: 1px solid #d1d5db;
+    box-shadow: 0 0 15px rgba(209, 213, 219, 0.15);
+}
+
+.club-btn {
+    flex: 1;
+    padding: 12px 0;
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    font-weight: 500;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.club-btn:hover {
+    background: #1f2937;
+}
+
+.club-btn.active {
+    background: #d1d5db;       /* светло-серая подсветка */
+    color: #111;
+    font-weight: 600;
+    box-shadow: 0 0 12px rgba(255,255,255,0.15);
+}
+
+/* ======================
+   BP HEADER (КАК РАНЬШЕ)
+====================== */
+
+.bp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.bp-big {
+    font-size: 36px;
+    font-weight: 700;
+    color: #ff9500;
+    margin-bottom: 6px;
+}
+
+.bp-level {
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 6px;
+}
+
+.vip-toggle {
+    font-size: 14px;
+}
+
+/* Подсветка выполненного задания */
+
+.bp-task.completed {
+    border-left-color: #00ff88;
+    box-shadow: 0 0 15px rgba(0,255,136,0.3);
+}
+
+/* Активная вкладка BP */
+
+.bp-tab.active {
+    background: #ff9500;
+    color: black;
+    font-weight: 600;
+}
+
+
+/* ОБЩИЕ СТИЛИ ДЛЯ СЕКЦИЙ */
+.section {
+    display: none;
+    animation: fadeIn 0.25s ease;
+}
+
+.section.active {
+    display: block;
+}
