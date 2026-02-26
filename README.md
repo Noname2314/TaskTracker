@@ -15,5 +15,3 @@ Desktop Battle Pass tracker built with:
 ## Run
 python task_tracker.py
 ## Интерфейс
-
-![Screenshot](screenshot.jpg)
