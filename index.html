@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>TaskTracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>TaskTracker</h1>
+        <h2>Всего BP: <span id="bpTotal">0</span></h2>
+
+        <div class="vip-toggle">
+            <span>VIP x2 BP</span>
+            <label class="switch">
+                <input type="checkbox" id="vipSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <!-- Старая кнопка сброса -->
+        <button id="resetTasks" title="Сбросить задания" style="margin-left:10px;">Сброс</button>
+    </div>
+
+    <div id="tasksContainer"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

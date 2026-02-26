@@ -1,0 +1,139 @@
+{
+    "vip": true,
+    "tasks": [
+        {
+            "id": 1,
+            "title": "Посетить любой сайт в браузере",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 2,
+            "title": "Зайти в любой канал в Brawl",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 3,
+            "title": "Поставить лайк любой анкете в Match",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 4,
+            "title": "Кинуть мяч питомцу 15 раз",
+            "bp": 2,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 5,
+            "title": "15 выполненных питомцем команд",
+            "bp": 2,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 6,
+            "title": "Ставка в колесе удачи в казино",
+            "bp": 3,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 7,
+            "title": "Проехать 1 станцию на метро",
+            "bp": 2,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 8,
+            "title": "Поймать 20 рыб",
+            "bp": 4,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 9,
+            "title": "Выполнить 2 квеста любых клубов",
+            "bp": 4,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 10,
+            "title": "Починить деталь в автосервисе",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 11,
+            "title": "Забросить 2 мяча в баскетболе",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 12,
+            "title": "Забить 2 гола в футболе",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 13,
+            "title": "Победить в армрестлинге",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 14,
+            "title": "Победить в дартс",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 15,
+            "title": "Поиграть 1 минуту в волейбол",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 16,
+            "title": "Поиграть 1 минуту в настольный теннис",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 17,
+            "title": "Поиграть 1 минуту в большой теннис",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 18,
+            "title": "Сыграть в мафию в казино",
+            "bp": 3,
+            "status": "progress",
+            "activeProgress": false
+        },
+        {
+            "id": 19,
+            "title": "Сделать платеж по лизингу",
+            "bp": 1,
+            "status": "progress",
+            "activeProgress": false
+        }
+    ],
+    "lastReset": "2026-02-25"
+}

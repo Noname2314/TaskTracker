@@ -1,0 +1,217 @@
+/* =========================
+   Общие стили
+========================= */
+body {
+    background: linear-gradient(135deg, #121212, #1a1a1a);
+    color: #f0f0f0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 22px 36px;
+    box-sizing: border-box;
+}
+
+/* =========================
+   Header: TaskTracker, BP, VIP
+========================= */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 30px;
+    position: relative;
+    padding: 22px 0 0 0;
+    min-height: 72px;
+    flex-wrap: wrap;
+}
+
+.header h1 {
+    font-size: 2rem;
+    color: #00ff88;
+    text-shadow: 0 0 8px #00ff88;
+    margin: 0;
+    position: absolute;
+    left: 16px;
+    top: -6px;
+}
+
+.header h2 {
+    font-weight: normal;
+    color: #ffffffaa;
+    margin: 0;
+    flex: 1 1 auto;
+    text-align: left;
+    margin-left: 16px;
+    font-size: 1.15rem;
+    padding-top: 6px;
+}
+
+.vip-toggle {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    margin-right: 8px;
+    padding-top: 6px;
+}
+
+.vip-toggle span {
+    margin-right: 18px;
+    font-size: 0.98rem;
+}
+
+/* =========================
+   VIP Переключатель (СТАРЫЙ)
+========================= */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 68px;
+    height: 30px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: linear-gradient(90deg, #9b9b9b, #d0d0d0);
+    border-radius: 30px;
+    transition: background 0.35s ease, box-shadow 0.35s ease;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 6px;
+    top: 4px;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, #ffffff, #e6e6e6);
+    border-radius: 50%;
+    transition: transform 0.35s cubic-bezier(.2,.9,.3,1), background 0.35s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+
+.switch input:checked + .slider {
+    background: linear-gradient(90deg, #33cc88, #36a2ff);
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(17px);
+    background: linear-gradient(180deg, #ffffff, #d8f6ff);
+}
+
+.switch input:focus-visible + .slider {
+    box-shadow: 0 0 0 4px rgba(54,162,255,0.12);
+}
+
+/* =========================
+   Кнопка сброса заданий (улучшенная)
+========================= */
+#resetTasks {
+    padding: 6px 14px;
+    background: linear-gradient(135deg, rgba(255,85,85,0.85), rgba(255,119,119,0.85));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: 0.3s all ease;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+}
+
+#resetTasks::before {
+    content: "🔄 ";
+}
+
+#resetTasks:hover {
+    background: linear-gradient(135deg, rgba(255,119,119,1), rgba(255,153,153,1));
+    box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    transform: translateY(-1px);
+}
+
+#resetTasks:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+}
+
+/* =========================
+   Карточки задач
+========================= */
+.task-card {
+    background: #1f1f1f;
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 0 15px #00000088;
+    transition: 0.3s;
+    border-left: 6px solid transparent;
+}
+
+.task-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 25px #00ff88aa;
+}
+
+.task-card.completed { border-left-color: #00ff88; }
+.task-card.failed { border-left-color: #ff4444; }
+
+/* Серый прогресс по умолчанию */
+.task-card.progress { border-left-color: #888888; }
+.task-card.progress .task-info .reward { color: #aaaaaa; }
+.task-actions button.progress { background-color: #888888; color: #fff; }
+
+/* Оранжевый при нажатии */
+.task-card.active-progress { border-left-color: #ffaa00; }
+.task-card.active-progress .task-actions button.progress { background-color: #ffaa00; color: #000; }
+
+.task-info strong { font-size: 1rem; }
+.task-info .reward { margin-left: 10px; font-size: 0.9rem; color: #cccccc; }
+
+.task-actions button {
+    margin-left: 10px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.task-actions button:hover { box-shadow: 0 0 8px #00ff88; }
+
+.task-actions button.completed { background-color: #00ff88; color: #000; }
+.task-actions button.failed { background-color: #ff4444; color: #fff; }
+
+/* =========================
+   Адаптив
+========================= */
+@media (max-width: 700px) {
+    .header { flex-direction: column; align-items: stretch; padding: 0 10px; }
+    .header h1, .header h2, .vip-toggle { flex: none; margin: 5px 0; }
+    .vip-toggle { justify-content: flex-start; }
+    .header h2 { text-align: center; }
+}
