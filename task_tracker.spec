@@ -5,7 +5,7 @@ a = Analysis(
     ['task_tracker.py'],
     pathex=[],
     binaries=[],
-    datas=[('index.html', '.'), ('style.css', '.'), ('script.js', '.'), ('tasks_status.json', '.')],
+    datas=[('index.html', '.'), ('style.css', '.'), ('script.js', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,5 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    version='version.txt',
+    icon=['icon.ico'],
 )

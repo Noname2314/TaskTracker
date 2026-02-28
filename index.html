@@ -33,11 +33,11 @@
 
         <!-- BP -->
         <div id="bp" class="section">
-            <h2>Battle Pass</h2>
 
             <div class="bp-header">
 
-                <div>
+                <!-- ЛЕВАЯ ЧАСТЬ -->
+                <div class="bp-left">
                     <div class="bp-big">
                         <span id="bp-total">0</span> BP
                     </div>
@@ -45,12 +45,26 @@
                     <div class="bp-bar">
                         <div class="bp-fill" id="bp-fill"></div>
                     </div>
+
+                    <div class="bp-reset-timer">
+                        Сброс через <span id="reset-timer">--:--:--</span>
+                    </div>
                 </div>
 
-                <label class="vip-toggle">
-                    <input type="checkbox" onchange="toggleVip()">
-                    VIP x2
-                </label>
+                <!-- ПРАВАЯ ЧАСТЬ -->
+                <div class="bp-right">
+
+                    <button class="reset-btn" onclick="manualReset()">
+                        Сбросить задания
+                    </button>
+
+                    <label class="vip-toggle">
+                        <input type="checkbox" id="vip-switch" onchange="toggleVip()">
+                        <span class="slider"></span>
+                        <span class="vip-text">VIP x2</span>
+                    </label>
+
+                </div>
 
             </div>
 
@@ -61,6 +75,7 @@
             </div>
 
             <div id="bp-container"></div>
+
         </div>
 
         <!-- TIMER -->

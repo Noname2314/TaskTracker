@@ -152,8 +152,8 @@ body {
 
 .content {
     flex: 1;
-    padding: 30px;
-    overflow-y: auto;
+    padding: 35px 30px 0 30px; /* было 20 — стало ниже */
+    overflow: hidden;
 }
 
 /* =========================
@@ -330,21 +330,42 @@ body {
 
 /* Карточка BP */
 
+/* =========================
+   BP TASK CARD (MODERN)
+========================= */
+
 .bp-task {
-    background: #1f1f1f;
-    padding: 14px 16px;
-    border-radius: 10px;
-    margin-bottom: 10px;
+    background: #1a1a22;
+    padding: 14px 18px;
+    border-radius: 14px;
+    margin-bottom: 12px;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-left: 4px solid #444;
-    transition: 0.2s;
+
+    border: 1px solid #262632;
+    transition: all 0.25s ease;
 }
 
+.bp-task:hover {
+    transform: translateY(-2px);
+    border-color: #3a3a4a;
+    box-shadow: 0 0 12px rgba(255,255,255,0.05);
+}
+
+/* ВЫПОЛНЕНО */
+
 .bp-task.completed {
-    border-left-color: #00ff88;
-    box-shadow: 0 0 12px rgba(0,255,136,0.3);
+    background: linear-gradient(90deg, #10251c, #14141c);
+    border-color: #00ff88;
+    box-shadow: 0 0 18px rgba(0,255,136,0.25);
+}
+
+.bp-task.completed label {
+    text-decoration: line-through;
+    color: #8cffc1;
+    opacity: 0.8;
 }
 
 .bp-task .bp-reward {
@@ -355,6 +376,52 @@ body {
 .bp-task input {
     transform: scale(1.2);
     cursor: pointer;
+}
+
+/* =========================
+   CUSTOM CHECKBOX
+========================= */
+
+.bp-task input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 18px;
+    height: 18px;
+
+    border-radius: 6px;
+    border: 2px solid #555;
+    background: #1f1f2a;
+
+    cursor: pointer;
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.bp-task input[type="checkbox"]:hover {
+    border-color: #888;
+}
+
+/* Активный */
+
+.bp-task input[type="checkbox"]:checked {
+    background: #00ff88;
+    border-color: #00ff88;
+    box-shadow: 0 0 10px rgba(0,255,136,0.6);
+}
+
+/* Галочка */
+
+.bp-task input[type="checkbox"]:checked::after {
+    content: "✓";
+    position: absolute;
+    color: #111;
+    font-size: 13px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
 }
 
 /* ===== ПЕРЕКЛЮЧАТЕЛЬ КЛУБОВ ===== */
@@ -396,14 +463,18 @@ body {
 }
 
 /* ======================
-   BP HEADER (КАК РАНЬШЕ)
+   BP HEADER 
 ====================== */
 
 .bp-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #14141c;
+    padding: 10px 0 15px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
 }
 
 .bp-big {
@@ -419,10 +490,82 @@ body {
     margin-top: 6px;
 }
 
-.vip-toggle {
-    font-size: 14px;
+/* =========================
+   RESET TIMER
+========================= */
+
+.bp-reset-timer {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #aaa;
 }
 
+#reset-timer {
+    color: #ff9500;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* =========================
+   VIP TOGGLE (FIXED)
+========================= */
+
+.vip-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px; /* опускаем ниже */
+}
+
+/* скрываем стандартный чекбокс */
+.vip-toggle input {
+    display: none;
+}
+
+/* переключатель */
+.vip-toggle .slider {
+    width: 46px;
+    height: 24px;
+    background: #2a2a35;
+    border-radius: 50px;
+    position: relative;
+    transition: 0.3s ease;
+}
+
+/* кружок */
+.vip-toggle .slider::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #888;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: 0.3s ease;
+}
+
+/* включено */
+.vip-toggle input:checked + .slider {
+    background: linear-gradient(90deg, #ff9500, #ffb84d);
+    box-shadow: 0 0 12px rgba(255,149,0,0.6);
+}
+
+.vip-toggle input:checked + .slider::before {
+    transform: translateX(22px);
+    background: white;
+}
+
+/* текст */
+.vip-text {
+    font-weight: 600;
+    color: #ccc;
+    transition: 0.3s;
+}
+
+.vip-toggle input:checked ~ .vip-text {
+    color: #ff9500;
+}
 /* Подсветка выполненного задания */
 
 .bp-task.completed {
@@ -447,4 +590,185 @@ body {
 
 .section.active {
     display: block;
+}
+
+/* =========================
+   MODERN SCROLLBAR
+========================= */
+
+/* ширина */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+/* трек (фон) */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ползунок */
+::-webkit-scrollbar-thumb {
+    background: #cfcfcf;     /* светло-серый */
+    border-radius: 100px;    /* полностью круглые края */
+}
+
+/* hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #b5b5b5;
+}
+
+/*BP TASK CARD ANIMATION*/
+.bp-task {
+    transition: all 0.2s ease;
+}
+
+.bp-task.completed {
+    opacity: 0.6;
+    transform: scale(0.98);
+}
+
+#bp-fill {
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    border-radius: 20px;
+    transition: width 0.3s ease;
+}
+
+/* Подсветка при наведении на карточку BP (легкое свечение) */
+
+.bp-task:hover {
+    background: #1e1e1e;
+    transform: translateX(3px);
+}
+
+/* =========================
+   BP FIXED HEADER + SCROLL
+========================= */
+
+#bp {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* =========================
+   BP HEADER (FINAL STYLE)
+========================= */
+
+.bp-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    position: relative;
+
+    background: transparent;
+    padding: 22px 0 22px 0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ПРЕМИАЛЬНАЯ ТОНКАЯ НЕОНОВАЯ ЛИНИЯ */
+/* SMOOTH GLOW SHIMMER */
+.bp-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        #ff9a00 25%,
+        #ffd000 50%,
+        #ff9a00 75%,
+        transparent 100%
+    );
+
+    opacity: 0.8;
+
+    box-shadow:
+        0 0 6px rgba(255,160,0,0.4),
+        0 0 14px rgba(255,140,0,0.25);
+
+    animation: glowPulse 4s ease-in-out infinite;
+}
+
+.bp-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0 15px 0;
+}
+
+#bp-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+/* Скролл только у заданий */
+
+#bp-container {
+    max-height: calc(100vh - 260px);
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+/* =========================
+   BP RIGHT SIDE
+========================= */
+
+.bp-right {
+    display: flex;
+    flex-direction: column;   /* ВАЖНО — колонка */
+    align-items: flex-end;    /* прижать к правому краю */
+    gap: 18px;                /* расстояние между кнопкой и VIP */
+    margin-top: 5px;
+}
+
+/* =========================
+   BP left SIDE
+========================= */
+
+.bp-left {
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================
+   RESET BUTTON
+========================= */
+
+.reset-btn {
+    background: #1c1c26;
+    border: 1px solid #ff9500;
+    color: #ff9500;
+    padding: 7px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.reset-btn:hover {
+    background: #ff9500;
+    color: #14141c;
+    box-shadow: 0 0 12px rgba(255,149,0,0.6);
+}
+
+@keyframes glowPulse {
+    0% {
+        opacity: 0.7;
+        filter: brightness(0.9);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.25);
+    }
+    100% {
+        opacity: 0.7;
+        filter: brightness(0.9);
+    }
 }
