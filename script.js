@@ -344,3 +344,31 @@ async function manualReset() {
     await loadFromBackend();
     renderTasks(currentTab);
 }
+
+/** Проверка обновлений (только для desktop версии)*/
+
+async function checkUpdate() {
+
+    const status = document.getElementById("update-status");
+    status.innerText = "Проверка обновлений...";
+
+    if (!window.pywebview) {
+        status.innerText = "Работает только в desktop версии.";
+        return;
+    }
+
+    try {
+        const result = await window.pywebview.api.check_update();
+
+        if (result === "no_update") {
+            status.innerText = "У вас последняя версия.";
+        } else if (result === "updated") {
+            status.innerText = "Обновление установлено. Перезапуск...";
+        } else {
+            status.innerText = "Ошибка обновления.";
+        }
+
+    } catch (e) {
+        status.innerText = "Ошибка соединения.";
+    }
+}

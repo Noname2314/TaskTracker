@@ -772,3 +772,26 @@ body {
         filter: brightness(0.9);
     }
 }
+
+/* =========================
+   UPDATE CHECKER*/
+
+.update-btn {
+    padding: 10px 20px;
+    background: #5865F2;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 15px;
+}
+
+.update-btn:hover {
+    background: #4752C4;
+}
+
+#update-status {
+    margin-top: 10px;
+    font-size: 14px;
+}

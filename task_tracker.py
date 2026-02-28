@@ -1,5 +1,7 @@
 import webview
 import json
+import requests
+import subprocess
 import os
 import sys
 from datetime import datetime, timedelta, timezone
@@ -18,6 +20,18 @@ MOSCOW_TZ = timezone(timedelta(hours=3))
 
 
 class Api:
+
+    def check_update(self):
+        update_url = check_for_updates()
+
+        if not update_url:
+            return "no_update"
+
+        if download_update(update_url):
+            apply_update()
+            return "updated"
+
+        return "error"
 
     def load_data(self):
         if not os.path.exists(TASKS_FILE):
@@ -91,6 +105,67 @@ class Api:
         self.save_data(data)
 
         return {"status": "updated"}
+
+GITHUB_USER = "Noname2314"
+GITHUB_REPO = "TaskTracker"
+
+def get_current_version():
+    if os.path.exists("version.txt"):
+        with open("version.txt", "r") as f:
+            return f.read().strip()
+    return "0.0.0"
+
+
+def check_for_updates():
+    try:
+        url = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/releases/latest"
+        response = requests.get(url, timeout=5)
+        data = response.json()
+
+        latest_version = data["tag_name"]
+        current_version = get_current_version()
+
+        if latest_version != current_version:
+            return data["assets"][0]["browser_download_url"]
+
+    except Exception as e:
+        print("Update check error:", e)
+
+    return None
+
+
+def download_update(url):
+    try:
+        response = requests.get(url, stream=True)
+        with open("TaskTracker_new.exe", "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        return True
+    except:
+        return False
+
+
+def apply_update():
+    current_exe = sys.executable
+    new_exe = os.path.join(os.getcwd(), "TaskTracker_new.exe")
+
+    if not os.path.exists(new_exe):
+        return
+
+    updater_script = os.path.join(os.getcwd(), "updater.bat")
+
+    with open(updater_script, "w") as f:
+        f.write(f"""@echo off
+ping 127.0.0.1 -n 3 > nul
+taskkill /f /im "{os.path.basename(current_exe)}"
+ping 127.0.0.1 -n 2 > nul
+move /y "{new_exe}" "{current_exe}"
+start "" "{current_exe}"
+del "%~f0"
+""")
+
+    subprocess.Popen(["cmd", "/c", updater_script])
+    sys.exit()
 
 
 if __name__ == "__main__":
