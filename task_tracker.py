@@ -111,8 +111,8 @@ GITHUB_REPO = "TaskTracker"
 
 def get_current_version():
     if os.path.exists("version.txt"):
-        with open("version.txt", "r") as f:
-            return f.read().strip()
+        with open("version.txt", "r", encoding="utf-8") as f:
+            return f.readline().strip()
     return "0.0.0"
 
 
