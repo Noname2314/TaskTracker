@@ -7,8 +7,8 @@ build/
 dist/
 *.spec
 
-# Logs
-*.log
+# User data
+tasks_status.json
 
 # OS
 .DS_Store
