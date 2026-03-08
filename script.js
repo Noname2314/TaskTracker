@@ -1,19 +1,22 @@
-// =============================
+// ======================
 // GLOBAL STATE
-// =============================
+// ======================
 
-let isVip = false;
-let currentTab = "solo";
+let isVip = false
+let isX2 = false
+let currentTab = "solo"
 
 let taskState = {
     solo: [],
     pair: [],
     faction: []
-};
+}
 
-// =============================
-// TASKS
-// =============================
+let timers = []
+
+// ======================
+// TASK LIST
+// ======================
 
 const tasks = {
     solo: [
@@ -83,292 +86,559 @@ const tasks = {
         { name: "Арест", bp: 1 },
         { name: "Выкуп с КПЗ 2", bp: 2 }
     ]
-};
+}
 
-// =============================
+// ======================
 // RENDER TASKS
-// =============================
+// ======================
 
-function renderTasks(type) {
-    const container = document.getElementById("bp-container");
-    container.innerHTML = "";
+function renderTasks(type){
 
-    tasks[type].forEach((task, index) => {
+const container=document.getElementById("bp-container")
+if(!container) return
 
-        if (taskState[type][index] === undefined) {
-            taskState[type][index] = false;
-        }
+container.innerHTML=""
 
-        const div = document.createElement("div");
-        div.className = "bp-task";
+tasks[type].forEach((task,index)=>{
 
-        if (taskState[type][index]) {
-            div.classList.add("completed");
-        }
-
-        div.innerHTML = `
-            <label>
-                <input type="checkbox"
-                    ${taskState[type][index] ? "checked" : ""}
-                    onchange="toggleTask('${type}', ${index})">
-                ${task.name}
-            </label>
-            <div class="bp-reward">
-            ${isVip ? task.bp * 2 : task.bp} BP
-         </div>
-        `;
-
-        container.appendChild(div);
-    });
-
-    updateBP();
+if(taskState[type][index]===undefined){
+taskState[type][index]=false
 }
 
-async function toggleTask(type, index) {
+const div=document.createElement("div")
+div.className="bp-task"
 
-    taskState[type][index] = !taskState[type][index];
-
-    // если работает через pywebview — сохраняем
-    if (window.pywebview) {
-        try {
-            await saveToBackend();
-        } catch (e) {
-            console.log("Ошибка сохранения:", e);
-        }
-    }
-
-    renderTasks(type);
+if(taskState[type][index]){
+div.classList.add("completed")
 }
 
-// =============================
-// BP CALC
-// =============================
+div.innerHTML=`
 
-function updateBP() {
-    let total = 0;
+<label>
+<input type="checkbox"
+${taskState[type][index]?"checked":""}
+onchange="toggleTask('${type}',${index})">
+${task.name}
+</label>
 
-    Object.keys(tasks).forEach(type => {
-        tasks[type].forEach((task, index) => {
-            if (taskState[type][index]) {
-                total += isVip ? task.bp * 2 : task.bp;
-            }
-        });
-    });
+<div class="bp-reward">
+${ (isVip ? task.bp*2 : task.bp) * (isX2 ? 2 : 1) } BP
+</div>
+`
 
-    document.getElementById("bp-total").innerText = total;
+container.appendChild(div)
 
-    const progress = (total % 10) * 10;
-    document.getElementById("bp-fill").style.width = progress + "%";
+})
+
+updateBP()
+
 }
 
-// =============================
-// VIP
-// =============================
+function switchBP(tab, btn){
 
-async function toggleVip() {
-    isVip = !isVip;
+currentTab = tab
 
-    if (window.pywebview) {
-        await saveToBackend();
-    }
+document.querySelectorAll(".bp-tab").forEach(b=>{
+b.classList.remove("active")
+})
 
-    renderTasks(currentTab);
+if(btn){
+btn.classList.add("active")
 }
 
-// =============================
-// BP TAB SWITCH
-// =============================
+renderTasks(tab)
+saveTasks()
 
-async function switchBP(tab, button) {
-    currentTab = tab;
-
-    document.querySelectorAll(".bp-tab").forEach(btn => {
-        btn.classList.remove("active");
-    });
-
-    button.classList.add("active");
-
-    renderTasks(tab);
-
-    if (window.pywebview) {
-        await saveToBackend();
-    }
 }
 
-// =============================
-// SECTION SWITCH
-// =============================
+// ======================
+// TASK TOGGLE
+// ======================
 
-function switchSection(id) {
+function toggleTask(type,index){
 
-    document.querySelectorAll(".section").forEach(sec => {
-        sec.style.display = "none";
-    });
+taskState[type][index]=!taskState[type][index]
 
-    document.getElementById(id).style.display = "block";
+saveTasks()
+renderTasks(type)
 
-    document.querySelectorAll(".nav-btn").forEach(btn => {
-        btn.classList.remove("active");
-    });
-
-    document.querySelector(`.nav-btn[onclick="switchSection('${id}')"]`)
-        ?.classList.add("active");
 }
 
-// =============================
-// CLUB SWITCH
-// =============================
+// ======================
+// BP COUNT
+// ======================
 
-function switchClub(id, button) {
+function updateBP(){
 
-    document.querySelectorAll(".club-content").forEach(c => {
-        c.classList.remove("active");
-    });
+let total=0
 
-    document.getElementById(id).classList.add("active");
+Object.keys(tasks).forEach(type=>{
 
-    document.querySelectorAll(".club-btn").forEach(btn => {
-        btn.classList.remove("active");
-    });
+tasks[type].forEach((task,i)=>{
 
-    button.classList.add("active");
+if(taskState[type][i]){
+total+= (isVip ? task.bp*2 : task.bp) * (isX2 ? 2 : 1)
 }
 
-// =============================
+})
+
+})
+
+const el=document.getElementById("bp-total")
+if(el) el.innerText=total
+
+const bar = document.getElementById("bp-fill")
+
+if(bar){
+
+let maxBP = 118
+
+if(isVip) maxBP*=2
+if(isX2) maxBP*=2
+
+let percent = (total/maxBP)*100
+if(percent>100) percent=100
+
+bar.style.width = percent + "%"
+
+}
+
+}
+
+// ======================
+// VIP / X2
+// ======================
+
+function toggleVip(){
+isVip=document.getElementById("vip-switch").checked
+saveTasks()
+renderTasks(currentTab)
+}
+
+function toggleX2(){
+isX2=document.getElementById("x2-switch").checked
+saveTasks()
+renderTasks(currentTab)
+}
+
+// ======================
+// TIMER SYSTEM
+// ======================
+
+function renderTimers(){
+
+const container=document.getElementById("timers-container")
+if(!container) return
+
+container.innerHTML=""
+
+// сортировка активных вверх
+timers.sort((a,b)=> (b.active===true) - (a.active===true))
+
+timers.forEach((timer,index)=>{
+
+const div=document.createElement("div")
+div.className="timer-card"
+
+if(timer.active){
+div.classList.add("active")
+}
+
+div.innerHTML=`
+
+<div class="timer-name">${timer.name}</div>
+
+<div class="timer-time" id="time-${index}">
+${formatTime(timer.remaining)}
+</div>
+
+<div class="timer-controls">
+
+<button class="timer-btn start 
+${timer.running ? 'running' : ''} 
+${timer.paused ? 'paused' : ''}" 
+onclick="toggleTimer(${index})">
+
+<span class="play">▶</span>
+<span class="pause">⏸</span>
+
+</button>
+
+<button class="timer-btn reset" onclick="resetTimer(${index})">↺</button>
+<button class="timer-btn delete" onclick="deleteTimer(${index})">✖</button>
+
+</div>
+`
+
+container.appendChild(div)
+
+})
+
+updateTimerStats()
+
+}
+
+function startTimer(index){
+
+const timer=timers[index]
+
+if(timer.active) return
+
+timer.active=true
+
+renderTimers()
+
+if(window.pywebview){
+window.pywebview.api.start_overlay(timer.name,timer.remaining)
+}
+
+timer.interval=setInterval(()=>{
+
+if(timer.remaining<=0){
+
+clearInterval(timer.interval)
+timer.active=false
+
+alert("Таймер завершён: "+timer.name)
+
+renderTimers()
+updateTimerStats()
+return
+
+}
+
+timer.remaining--
+
+const el=document.getElementById("time-"+index)
+if(el) el.innerText=formatTime(timer.remaining)
+
+saveTimers()
+
+},1000)
+
+updateTimerStats()
+
+}
+
+function resetTimer(index){
+
+const timer=timers[index]
+
+clearInterval(timer.interval)
+
+timer.remaining=timer.duration
+timer.active=false
+
+saveTimers()
+renderTimers()
+
+}
+
+function deleteTimer(index){
+
+clearInterval(timers[index].interval)
+
+timers.splice(index,1)
+
+saveTimers()
+renderTimers()
+
+}
+
+// ======================
+// TIMER STATS
+// ======================
+
+function updateTimerStats(){
+
+document.getElementById("timer-total").innerText=timers.length
+
+const active=timers.filter(t=>t.active).length
+const done=timers.filter(t=>t.remaining===0).length
+
+document.getElementById("timer-active").innerText=active
+document.getElementById("timer-done").innerText=done
+
+}
+
+// ======================
+// FORMAT TIME
+// ======================
+
+function formatTime(sec){
+
+const h=Math.floor(sec/3600)
+const m=Math.floor((sec%3600)/60)
+const s=sec%60
+
+return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
+
+}
+
+// ======================
+// SAVE / LOAD
+// ======================
+
+function saveTasks(){
+localStorage.setItem("tasks",JSON.stringify({
+tasks:taskState,
+vip:isVip,
+x2:isX2,
+tab:currentTab
+}))
+}
+
+function loadTasks(){
+
+const data=localStorage.getItem("tasks")
+if(!data) return
+
+const obj=JSON.parse(data)
+
+taskState=obj.tasks
+isVip=obj.vip
+isX2=obj.x2 || false
+currentTab=obj.tab
+
+}
+
+function saveTimers(){
+localStorage.setItem("timers",JSON.stringify(timers))
+}
+
+function loadTimers(){
+
+const data = localStorage.getItem("timers")
+if(!data) return
+
+timers = JSON.parse(data)
+
+}
+
+// ======================
 // START
-// =============================
+// ======================
 
-window.addEventListener("pywebviewready", async () => {
-    await loadFromBackend();
-    renderTasks(currentTab);
-    switchSection("home");
-    startResetTimer();
-});
-// =============================
-// RESET TIMER (07:00 MSK)
-// =============================
+function startApp(){
 
-function getMoscowTime() {
-    const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    return new Date(utc + (3 * 60 * 60 * 1000)); // UTC+3
+loadTasks()
+loadTimers()
+
+renderTasks(currentTab)
+renderTimers()
+
 }
 
-function getNextResetTime() {
-    const now = getMoscowTime();
-    const reset = new Date(now);
+window.addEventListener("DOMContentLoaded", startApp)
+window.addEventListener("pywebviewready", startApp)
 
-    reset.setHours(7, 0, 0, 0);
+// ======================
+// HUD UPDATE
+// ======================
 
-    if (now >= reset) {
-        reset.setDate(reset.getDate() + 1);
-    }
+function sendTimersToHUD(){
 
-    return reset;
+let active = timers
+.filter(t => t.active)
+.map(t => {
+return {
+name: t.name,
+time: formatTime(t.remaining)
+}
+})
+
+if(window.pywebview){
+window.pywebview.api.update_overlay(active)
 }
 
-function startResetTimer() {
-
-    function updateTimer() {
-        const now = getMoscowTime();
-        const reset = getNextResetTime();
-
-        const diff = reset - now;
-
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-
-        const formatted =
-            String(hours).padStart(2, '0') + "ч " +
-            String(minutes).padStart(2, '0') + "м " +
-            String(seconds).padStart(2, '0') + "с";
-
-        const el = document.getElementById("reset-timer");
-        if (el) el.innerText = formatted;
-    }
-
-    updateTimer();
-    setInterval(updateTimer, 1000);
 }
 
-// сохранение и загрузка состояния задач через pywebview API
+setInterval(()=>{
 
-async function loadFromBackend() {
-    const data = await window.pywebview.api.get_tasks();
+sendTimersToHUD()
 
-    if (data.tasks) {
-        taskState = {
-            solo: data.tasks.solo || [],
-            pair: data.tasks.pair || [],
-            faction: data.tasks.faction || []
-        };
-    }
+},1000)
 
-    // --- VIP ---
-    isVip = data.vip || false;
+// ======================
+// UI NAVIGATION
+// ======================
 
-    const vipSwitch = document.getElementById("vip-switch");
-    if (vipSwitch) {
-        vipSwitch.checked = isVip;
-    }
+function switchSection(id, btn=null){
 
-    // --- Последняя вкладка ---
-    currentTab = data.last_tab || "solo";
+document.querySelectorAll(".section").forEach(sec=>{
+sec.classList.remove("active")
+sec.style.display="none"
+})
+
+const target = document.getElementById(id)
+
+if(target){
+target.classList.add("active")
+target.style.display="block"
 }
 
-async function saveToBackend() {
-    await window.pywebview.api.update_tasks({
-        tasks: taskState,
-        vip: isVip,
-        last_tab: currentTab
-    });
+document.querySelectorAll(".nav-btn").forEach(b=>{
+b.classList.remove("active")
+})
+
+if(btn){
+btn.classList.add("active")
 }
 
-/* Ручной сброс задач (для отладки и в случае проблем с автосбросом) */
-
-async function manualReset() {
-
-    if (!confirm("Сбросить все задания?")) return;
-
-    await window.pywebview.api.update_tasks({
-        tasks: {
-            solo: [],
-            pair: [],
-            faction: []
-        },
-        vip: isVip,
-        last_tab: currentTab
-    });
-
-    await loadFromBackend();
-    renderTasks(currentTab);
 }
 
-/** Проверка обновлений (только для desktop версии)*/
+window.addEventListener("DOMContentLoaded", () => {
+switchSection("home");
+})
 
-async function checkUpdate() {
+// ======================
+// PYTHON → JS TIMER ADD
+// ======================
 
-    const status = document.getElementById("update-status");
-    status.innerText = "Проверка обновлений...";
+function addTimerFromPython(name, seconds){
 
-    if (!window.pywebview) {
-        status.innerText = "Работает только в desktop версии.";
-        return;
-    }
+seconds = parseInt(seconds)
 
-    try {
-        const result = await window.pywebview.api.check_update();
+if(isNaN(seconds)){
+seconds = 0
+}
 
-        if (result === "no_update") {
-            status.innerText = "У вас последняя версия.";
-        } else if (result === "updated") {
-            status.innerText = "Обновление установлено. Перезапуск...";
-        } else {
-            status.innerText = "Ошибка обновления.";
-        }
+timers.push({
+name: name,
+duration: seconds,
+remaining: seconds,
+running: false,
+paused: false
+})
 
-    } catch (e) {
-        status.innerText = "Ошибка соединения.";
-    }
+saveTimers()
+renderTimers()
+
+}
+
+// ======================
+// RESET TASKS
+// ======================
+
+function resetTasks(){
+
+if(!confirm("Сбросить все задания?")){
+return
+}
+
+taskState = {
+solo: [],
+pair: [],
+faction: []
+}
+
+saveTasks()
+
+renderTasks(currentTab)
+updateBP()
+
+}
+
+// ======================
+// RESET MODAL
+// ======================
+
+function openResetModal(){
+document.getElementById("reset-modal").style.display="flex"
+}
+
+function closeResetModal(){
+document.getElementById("reset-modal").style.display="none"
+}
+
+function confirmReset(){
+
+taskState={
+solo:[],
+pair:[],
+faction:[]
+}
+
+saveTasks()
+renderTasks(currentTab)
+updateBP()
+
+closeResetModal()
+
+}
+
+// таймер для bp 
+
+function updateResetTimer(){
+
+const el = document.getElementById("reset-timer")
+if(!el) return
+
+const now = new Date()
+const reset = new Date()
+
+reset.setHours(7,0,0,0)
+
+if(now > reset){
+reset.setDate(reset.getDate()+1)
+}
+
+const diff = Math.floor((reset - now)/1000)
+
+el.innerText = formatTime(diff)
+
+}
+
+updateResetTimer()
+setInterval(updateResetTimer,1000)
+
+// fuction togle timer 
+
+function toggleTimer(index){
+
+const timer = timers[index]
+
+if(timer.running){
+
+// ставим на паузу
+clearInterval(timer.interval)
+
+timer.running = false
+timer.paused = true
+
+}else{
+
+timer.running = true
+timer.paused = false
+
+timer.interval = setInterval(()=>{
+
+if(timer.remaining<=0){
+
+clearInterval(timer.interval)
+
+timer.running=false
+timer.paused=false
+
+alert("Таймер завершён: "+timer.name)
+
+renderTimers()
+updateTimerStats()
+return
+
+}
+
+timer.remaining--
+
+const el=document.getElementById("time-"+index)
+if(el) el.innerText=formatTime(timer.remaining)
+
+saveTimers()
+
+},1000)
+
+}
+
+renderTimers()
+
 }

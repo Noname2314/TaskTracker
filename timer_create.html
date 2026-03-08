@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>Создать таймер</title>
+
+<style>
+
+body{
+margin:0;
+background:#111426;
+color:white;
+font-family:Segoe UI;
+display:flex;
+align-items:center;
+justify-content:center;
+height:100vh;
+}
+
+.box{
+width:400px;
+background:#1c2035;
+padding:30px;
+border-radius:10px;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+background:#111426;
+border:1px solid #333;
+color:white;
+border-radius:6px;
+}
+
+.row{
+display:flex;
+gap:10px;
+}
+
+button{
+padding:10px 20px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.create{
+background:#27c46a;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Создать таймер</h2>
+
+<input id="name" placeholder="Название">
+
+<div class="row">
+
+<input id="h" type="number" placeholder="ч">
+<input id="m" type="number" placeholder="м">
+<input id="s" type="number" placeholder="с">
+
+</div>
+
+<br>
+
+<button class="create" onclick="createTimer()">Создать</button>
+
+</div>
+
+<script>
+
+async function createTimer(){
+
+const name=document.getElementById("name").value
+
+const h=parseInt(document.getElementById("h").value)||0
+const m=parseInt(document.getElementById("m").value)||0
+const s=parseInt(document.getElementById("s").value)||0
+
+const seconds=h*3600+m*60+s
+
+if(!name || seconds===0) return
+
+await window.pywebview.api.create_timer(name,seconds)
+
+window.close()
+
+}
+
+</script>
+
+</body>
+</html>

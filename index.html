@@ -13,14 +13,14 @@
     <div class="sidebar">
         <h1 class="logo">Task Tracker</h1>
 
-        <button class="nav-btn active" onclick="switchSection('home')">Главная</button>
-        <button class="nav-btn" onclick="switchSection('bp')">BP</button>
-        <button class="nav-btn" onclick="switchSection('timer')">Таймер</button>
-        <button class="nav-btn" onclick="switchSection('clubs')">Клубы</button>
-        <button class="nav-btn" onclick="switchSection('guides')">Гайды</button>
-        <button class="nav-btn" onclick="switchSection('useful')">Полезное</button>
-        <button class="nav-btn" onclick="switchSection('macros')">Макросы</button>
-        <button class="nav-btn" onclick="switchSection('settings')">Настройки</button>
+        <button class="nav-btn active" onclick="switchSection('home', this)">Главная</button>
+        <button class="nav-btn" onclick="switchSection('bp', this)">BP</button>
+        <button class="nav-btn" onclick="switchSection('timer', this)">Таймер</button>
+        <button class="nav-btn" onclick="switchSection('clubs', this)">Клубы</button>
+        <button class="nav-btn" onclick="switchSection('guides', this)">Гайды</button>
+        <button class="nav-btn" onclick="switchSection('useful', this)">Полезное</button>
+        <button class="nav-btn" onclick="switchSection('macros', this)">Макросы</button>
+        <button class="nav-btn" onclick="switchSection('settings', this)">Настройки</button>
     </div>
 
     <!-- CONTENT -->
@@ -54,15 +54,23 @@
                 <!-- ПРАВАЯ ЧАСТЬ -->
                 <div class="bp-right">
 
-                    <button class="reset-btn" onclick="manualReset()">
-                        Сбросить задания
-                    </button>
+                    <div class="toggles-row">
+                        <label class="vip-toggle">
+                            <input type="checkbox" id="vip-switch" onchange="toggleVip()">
+                            <span class="slider"></span>
+                            <span class="vip-text">VIP x2</span>
+                        </label>
 
-                    <label class="vip-toggle">
-                        <input type="checkbox" id="vip-switch" onchange="toggleVip()">
-                        <span class="slider"></span>
-                        <span class="vip-text">VIP x2</span>
-                    </label>
+                        <label class="x2-toggle">
+                            <input type="checkbox" id="x2-switch" onchange="toggleX2()">
+                            <span class="slider"></span>
+                            <span class="x2-text">X2</span>
+                        </label>
+                    </div>
+
+                    <button class="reset-btn" onclick="openResetModal()">
+                    Сбросить задания
+                    </button>
 
                 </div>
 
@@ -75,12 +83,59 @@
             </div>
 
             <div id="bp-container"></div>
-
         </div>
 
         <!-- TIMER -->
         <div id="timer" class="section">
-            <h2>Таймер</h2>
+
+        <div class="timer-header">
+
+        <h2>Таймеры</h2>
+
+        <div class="timer-stats">
+
+        <div class="timer-stat">
+        <div id="timer-total">0</div>
+        <span>Всего</span>
+        </div>
+
+        <div class="timer-stat">
+        <div id="timer-active">0</div>
+        <span>Активных</span>
+        </div>
+
+        <div class="timer-stat">
+        <div id="timer-done">0</div>
+        <span>Готово</span>
+        </div>
+
+        </div>
+
+        <button class="add-timer-btn" onclick="window.pywebview.api.open_timer_window()">
+        + Добавить свой таймер
+        </button>
+
+        </div>
+
+        <div id="timers-container" class="timers-list">
+
+                <div class="timer-card">
+
+                    <div class="timer-left">
+                        <div class="timer-title">Таймер 5</div>
+                        <div class="timer-time">00:55:00</div>
+                    </div>
+
+                    <div class="timer-controls">
+                        <button class="timer-btn">▶</button>
+                        <button class="timer-btn">↻</button>
+                        <button class="timer-btn delete">✕</button>
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
 
         <!-- CLUBS -->
@@ -128,6 +183,7 @@
 
         <!-- SETTINGS -->
         <div id="settings" class="section">
+
         <h2>Настройки</h2>
 
         <button class="update-btn" onclick="checkUpdate()">
@@ -135,9 +191,92 @@
         </button>
 
         <div id="update-status"></div>
+
+        <hr>
+
+        <h3>Overlay (поверх игры)</h3>
+
+        <label class="overlay-toggle">
+            <input type="checkbox" id="overlay-enable" checked
+            onchange="toggleOverlay()">
+            Включить Overlay
+        </label>
+
+        <br><br>
+
+        <label>Позиция Overlay</label>
+
+        <select id="overlay-position" onchange="changeOverlayPosition()">
+
+            <option value="top-right">Правый верх</option>
+            <option value="top-left">Левый верх</option>
+            <option value="bottom-right">Правый низ</option>
+            <option value="bottom-left">Левый низ</option>
+
+        </select>
+
+        <br><br>
+
+        <button onclick="testOverlay()">Тест Overlay</button>
+
         </div>
 
     </div>
+</div>
+<script>
+
+async function openTimerWindow() {
+    await window.pywebview.api.open_timer_window();
+}
+
+function toggleOverlay(){
+
+    const enabled=document.getElementById("overlay-enable").checked
+
+    if(window.pywebview){
+        window.pywebview.api.toggle_overlay(enabled)
+    }
+
+}
+
+function changeOverlayPosition(){
+
+    const pos=document.getElementById("overlay-position").value
+
+    if(window.pywebview){
+        window.pywebview.api.set_overlay_position(pos)
+    }
+
+}
+
+function testOverlay(){
+
+    if(window.pywebview){
+        window.pywebview.api.start_overlay("Тестовый таймер",60)
+    }
+
+}
+
+</script>
+
+<div id="reset-modal" class="modal">
+
+    <div class="modal-box">
+
+    <h3>Сброс заданий</h3>
+
+    <p>Вы уверены, что хотите сбросить все задания?</p>
+
+    <div class="modal-buttons">
+
+        <button class="modal-cancel" onclick="closeResetModal()">Отмена</button>
+
+        <button class="modal-confirm" onclick="confirmReset()">Сбросить</button>
+
+    </div>
+
+    </div>
+
 </div>
 
 <script src="script.js"></script>

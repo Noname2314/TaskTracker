@@ -1,10 +1,28 @@
 import webview
 import json
 import requests
-import subprocess
 import os
 import sys
+import threading
+import time
+import winsound
 from datetime import datetime, timedelta, timezone
+import shutil
+import tkinter as tk
+
+# ===== FILES =====
+
+SETTINGS_FILE = "settings.json"
+TIMERS_FILE = "timers.json"
+
+def create_backup():
+    try:
+        if os.path.exists(TASKS_FILE):
+            shutil.copy(TASKS_FILE, "tasks_backup.json")
+    except Exception as e:
+        print("Backup error:", e)
+
+create_backup()
 
 def resource_path(relative_path):
     try:
@@ -14,24 +32,186 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 INDEX_HTML = resource_path("index.html")
+TIMER_HTML = resource_path("timer_create.html")
 TASKS_FILE = resource_path("tasks_status.json")
 
 MOSCOW_TZ = timezone(timedelta(hours=3))
 
+window = None
+overlay = None
+
+
+# ===== SETTINGS =====
+
+def load_settings():
+
+    if not os.path.exists(SETTINGS_FILE):
+        return {
+            "overlay_enabled": True,
+            "overlay_position": "top-right"
+        }
+
+    with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_settings(data):
+    with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
+
+
+# ===== OVERLAY =====
+
+class Overlay:
+
+    def __init__(self):
+
+        self.root = tk.Tk()
+        self.root.overrideredirect(True)
+        self.root.attributes("-topmost", True)
+        self.root.configure(bg="black")
+
+        self.label = tk.Label(
+            self.root,
+            text="",
+            fg="white",
+            bg="black",
+            font=("Arial", 16),
+            padx=10,
+            pady=5
+        )
+
+        self.label.pack()
+
+        self.set_position(load_settings()["overlay_position"])
+
+        threading.Thread(target=self.root.mainloop, daemon=True).start()
+
+    def set_position(self, pos):
+
+        screen_w = self.root.winfo_screenwidth()
+        screen_h = self.root.winfo_screenheight()
+
+        if pos == "top-right":
+            x = screen_w - 200
+            y = 40
+
+        elif pos == "top-left":
+            x = 40
+            y = 40
+
+        elif pos == "bottom-right":
+            x = screen_w - 200
+            y = screen_h - 100
+
+        else:
+            x = 40
+            y = screen_h - 100
+
+        self.root.geometry(f"+{x}+{y}")
+
+    def update(self, name, seconds):
+
+        m = seconds // 60
+        s = seconds % 60
+
+        self.label.config(text=f"{name}\n{m:02}:{s:02}")
+
+    def hide(self):
+        self.root.withdraw()
+
+    def show(self):
+        self.root.deiconify()
+
+
+# ===== API =====
 
 class Api:
 
-    def check_update(self):
-        update_url = check_for_updates()
+    # ===== ТАЙМЕРЫ =====
 
-        if not update_url:
-            return "no_update"
+    def open_timer_window(self):
+        webview.create_window(
+            "Создать таймер",
+            TIMER_HTML,
+            js_api=self,
+            width=420,
+            height=300,
+            resizable=False
+        )
 
-        if download_update(update_url):
-            apply_update()
-            return "updated"
+    def create_timer(self, name, seconds):
 
-        return "error"
+        name = str(name).replace("'", "\\'")
+        seconds = int(seconds)
+
+        webview.windows[0].evaluate_js(
+            f"addTimerFromPython('{name}', {seconds})"
+        )
+
+        return {"status": "ok"}
+
+    # ===== OVERLAY =====
+
+    def start_overlay(self, name, seconds):
+
+        global overlay
+
+        settings = load_settings()
+
+        if not settings["overlay_enabled"]:
+            return
+
+        if overlay is None:
+            overlay = Overlay()
+
+        def run():
+
+            t = seconds
+
+            while t >= 0:
+
+                overlay.update(name, t)
+
+                time.sleep(1)
+
+                t -= 1
+
+            winsound.MessageBeep()
+            self.notify("Timer finished", name)
+
+        threading.Thread(target=run, daemon=True).start()
+
+    def toggle_overlay(self, enabled):
+
+        settings = load_settings()
+        settings["overlay_enabled"] = enabled
+        save_settings(settings)
+
+        if overlay:
+            if enabled:
+                overlay.show()
+            else:
+                overlay.hide()
+
+    def set_overlay_position(self, pos):
+
+        settings = load_settings()
+        settings["overlay_position"] = pos
+        save_settings(settings)
+
+        if overlay:
+            overlay.set_position(pos)
+
+    # ===== NOTIFICATIONS =====
+
+    def notify(self, title, text):
+
+        webview.windows[0].evaluate_js(
+            f"showNotification('{title}','{text}')"
+        )
+
+    # ===== TASKS =====
 
     def load_data(self):
         if not os.path.exists(TASKS_FILE):
@@ -52,6 +232,7 @@ class Api:
         return {
             "last_reset": None,
             "vip": False,
+            "x2": False,
             "last_tab": "solo",
             "tasks": {
                 "solo": [],
@@ -65,7 +246,26 @@ class Api:
             json.dump(data, f, indent=4, ensure_ascii=False)
         return {"status": "saved"}
 
+    def get_tasks(self):
+        return self.load_data()
+
+    def update_tasks(self, data_from_js):
+
+        data = self.load_data()
+
+        data["tasks"] = data_from_js.get("tasks", {})
+        data["vip"] = data_from_js.get("vip", False)
+        data["x2"] = data_from_js.get("x2", False)
+        data["last_tab"] = data_from_js.get("last_tab", "solo")
+
+        self.save_data(data)
+
+        return {"status": "updated"}
+
+    # ===== RESET =====
+
     def _check_reset(self, data):
+
         now = datetime.now(MOSCOW_TZ)
         reset_time = now.replace(hour=7, minute=0, second=0, microsecond=0)
 
@@ -90,24 +290,12 @@ class Api:
             data["last_reset"] = reset_time.isoformat()
             self.save_data(data)
 
-    # ===== API =====
 
-    def get_tasks(self):
-        return self.load_data()
-
-    def update_tasks(self, data_from_js):
-        data = self.load_data()
-
-        data["tasks"] = data_from_js.get("tasks", {})
-        data["vip"] = data_from_js.get("vip", False)
-        data["last_tab"] = data_from_js.get("last_tab", "solo")
-
-        self.save_data(data)
-
-        return {"status": "updated"}
+# ===== UPDATE SYSTEM =====
 
 GITHUB_USER = "Noname2314"
 GITHUB_REPO = "TaskTracker"
+
 
 def get_current_version():
     if os.path.exists("version.txt"):
@@ -134,47 +322,23 @@ def check_for_updates():
     return None
 
 
-def download_update(url):
-    try:
-        response = requests.get(url, stream=True)
-        with open("TaskTracker_new.exe", "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        return True
-    except:
-        return False
-
-
-def apply_update():
-    current_exe = sys.executable
-    new_exe = os.path.join(os.getcwd(), "TaskTracker_new.exe")
-
-    if not os.path.exists(new_exe):
-        return
-
-    updater_script = os.path.join(os.getcwd(), "updater.bat")
-
-    with open(updater_script, "w") as f:
-        f.write(f"""@echo off
-ping 127.0.0.1 -n 3 > nul
-taskkill /f /im "{os.path.basename(current_exe)}"
-ping 127.0.0.1 -n 2 > nul
-move /y "{new_exe}" "{current_exe}"
-start "" "{current_exe}"
-del "%~f0"
-""")
-
-    subprocess.Popen(["cmd", "/c", updater_script])
-    sys.exit()
-
+# ===== START =====
 
 if __name__ == "__main__":
+
     api = Api()
+
     window = webview.create_window(
         "TaskTracker",
-        INDEX_HTML,
+        "index.html",
         js_api=api,
         width=1000,
         height=700
     )
+
+    update_url = check_for_updates()
+
+if update_url:
+    print("Update available:", update_url)
+
     webview.start()
