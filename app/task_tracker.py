@@ -10,19 +10,8 @@ from datetime import datetime, timedelta, timezone
 import shutil
 import tkinter as tk
 
-# ===== FILES =====
 
-SETTINGS_FILE = "settings.json"
-TIMERS_FILE = "timers.json"
-
-def create_backup():
-    try:
-        if os.path.exists(TASKS_FILE):
-            shutil.copy(TASKS_FILE, "tasks_backup.json")
-    except Exception as e:
-        print("Backup error:", e)
-
-create_backup()
+# ===== PATH HELPER =====
 
 def resource_path(relative_path):
     try:
@@ -31,9 +20,28 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-INDEX_HTML = resource_path("index.html")
-TIMER_HTML = resource_path("timer_create.html")
-TASKS_FILE = resource_path("tasks_status.json")
+
+# ===== FILES =====
+
+SETTINGS_FILE = "settings.json"
+TASKS_FILE = resource_path("app/tasks_status.json")
+INDEX_HTML = resource_path("app/ui/index.html")
+TIMER_HTML = resource_path("app/ui/timer_create.html")
+
+# icons for windows; keep .ico files under app/icons/ and add them to the PyInstaller spec
+MAIN_ICON = resource_path(os.path.join("app", "icons", "main.ico"))
+TIMER_ICON = resource_path(os.path.join("app", "icons", "timer.ico"))
+
+
+def create_backup():
+    try:
+        if os.path.exists(TASKS_FILE):
+            shutil.copy(TASKS_FILE, "tasks_backup.json")
+    except Exception as e:
+        print("Backup error:", e)
+
+
+create_backup()
 
 MOSCOW_TZ = timezone(timedelta(hours=3))
 
@@ -131,13 +139,15 @@ class Api:
     # ===== ТАЙМЕРЫ =====
 
     def open_timer_window(self):
+        # webview on Windows does not support an "icon" argument –
+        # the window will inherit the icon from the hosting executable.
         webview.create_window(
             "Создать таймер",
             TIMER_HTML,
             js_api=self,
             width=420,
             height=300,
-            resizable=False
+            resizable=False,
         )
 
     def create_timer(self, name, seconds):
@@ -313,6 +323,9 @@ def check_for_updates():
         latest_version = data["tag_name"]
         current_version = get_current_version()
 
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+
         if latest_version != current_version:
             return data["assets"][0]["browser_download_url"]
 
@@ -321,24 +334,30 @@ def check_for_updates():
 
     return None
 
-
 # ===== START =====
 
 if __name__ == "__main__":
 
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    HTML = os.path.join(BASE_DIR, "ui", "index.html")
+
+    # main and timer icon paths are defined at module level
+
     api = Api()
 
+    # create the main application window; on Windows icon argument is ignored
+    # the executable's icon (specified in the PyInstaller spec) is used instead
     window = webview.create_window(
         "TaskTracker",
-        "index.html",
+        HTML,
         js_api=api,
         width=1000,
-        height=700
+        height=700,
     )
+
+    webview.start(debug=False)
 
     update_url = check_for_updates()
 
-if update_url:
-    print("Update available:", update_url)
-
-    webview.start()
+    if update_url:
+        print("Update available:", update_url)

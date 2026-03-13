@@ -233,15 +233,23 @@ if(!container) return
 container.innerHTML=""
 
 // сортировка активных вверх
-timers.sort((a,b)=> (b.active===true) - (a.active===true))
+timers.sort((a,b)=> (b.running===true) - (a.running===true))
 
 timers.forEach((timer,index)=>{
 
 const div=document.createElement("div")
 div.className="timer-card"
 
-if(timer.active){
-div.classList.add("active")
+if(timer.running){
+div.classList.add("running")
+}
+
+if(timer.paused){
+div.classList.add("paused")
+}
+
+if(timer.remaining === 0){
+div.classList.add("finished")
 }
 
 div.innerHTML=`
@@ -380,30 +388,48 @@ return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).pa
 // ======================
 
 function saveTasks(){
-localStorage.setItem("tasks",JSON.stringify({
-tasks:taskState,
-vip:isVip,
-x2:isX2,
-tab:currentTab
-}))
+
+const data = {
+tasks: taskState,
+vip: isVip,
+x2: isX2,
+last_tab: currentTab
 }
 
-function loadTasks(){
+window.pywebview.api.update_tasks(data)
 
-const data=localStorage.getItem("tasks")
+}
+
+async function loadTasks(){
+
+const data = await window.pywebview.api.get_tasks()
+
 if(!data) return
 
-const obj=JSON.parse(data)
+taskState = data.tasks || {
+solo: [],
+pair: [],
+faction: []
+}
 
-taskState=obj.tasks
-isVip=obj.vip
-isX2=obj.x2 || false
-currentTab=obj.tab
+isVip = data.vip || false
+isX2 = data.x2 || false
+currentTab = data.last_tab || "solo"
 
 }
 
 function saveTimers(){
-localStorage.setItem("timers",JSON.stringify(timers))
+
+const data = timers.map(t => ({
+name: t.name,
+duration: t.duration,
+remaining: t.remaining,
+running: t.running,
+paused: t.paused
+}))
+
+localStorage.setItem("timers", JSON.stringify(data))
+
 }
 
 function loadTimers(){
@@ -413,24 +439,25 @@ if(!data) return
 
 timers = JSON.parse(data)
 
+timers.forEach(timer=>{
+timer.interval = null
+})
+
 }
 
 // ======================
 // START
 // ======================
 
-function startApp(){
+async function startApp(){
 
-loadTasks()
-loadTimers()
+await loadAppState()
 
 renderTasks(currentTab)
 renderTimers()
+updateBP()
 
 }
-
-window.addEventListener("DOMContentLoaded", startApp)
-window.addEventListener("pywebviewready", startApp)
 
 // ======================
 // HUD UPDATE
@@ -446,17 +473,12 @@ name: t.name,
 time: formatTime(t.remaining)
 }
 })
-
 if(window.pywebview){
 window.pywebview.api.update_overlay(active)
 }
-
 }
-
 setInterval(()=>{
-
 sendTimersToHUD()
-
 },1000)
 
 // ======================
@@ -464,29 +486,22 @@ sendTimersToHUD()
 // ======================
 
 function switchSection(id, btn=null){
-
 document.querySelectorAll(".section").forEach(sec=>{
 sec.classList.remove("active")
 sec.style.display="none"
 })
-
 const target = document.getElementById(id)
-
 if(target){
 target.classList.add("active")
 target.style.display="block"
 }
-
 document.querySelectorAll(".nav-btn").forEach(b=>{
 b.classList.remove("active")
 })
-
 if(btn){
 btn.classList.add("active")
 }
-
 }
-
 window.addEventListener("DOMContentLoaded", () => {
 switchSection("home");
 })
@@ -496,13 +511,10 @@ switchSection("home");
 // ======================
 
 function addTimerFromPython(name, seconds){
-
 seconds = parseInt(seconds)
-
 if(isNaN(seconds)){
 seconds = 0
 }
-
 timers.push({
 name: name,
 duration: seconds,
@@ -510,7 +522,6 @@ remaining: seconds,
 running: false,
 paused: false
 })
-
 saveTimers()
 renderTimers()
 
@@ -521,22 +532,17 @@ renderTimers()
 // ======================
 
 function resetTasks(){
-
 if(!confirm("Сбросить все задания?")){
 return
 }
-
 taskState = {
 solo: [],
 pair: [],
 faction: []
 }
-
 saveTasks()
-
 renderTasks(currentTab)
 updateBP()
-
 }
 
 // ======================
@@ -546,47 +552,34 @@ updateBP()
 function openResetModal(){
 document.getElementById("reset-modal").style.display="flex"
 }
-
 function closeResetModal(){
 document.getElementById("reset-modal").style.display="none"
 }
-
 function confirmReset(){
-
 taskState={
 solo:[],
 pair:[],
 faction:[]
 }
-
 saveTasks()
 renderTasks(currentTab)
 updateBP()
-
 closeResetModal()
-
 }
 
 // таймер для bp 
 
 function updateResetTimer(){
-
 const el = document.getElementById("reset-timer")
 if(!el) return
-
 const now = new Date()
 const reset = new Date()
-
 reset.setHours(7,0,0,0)
-
 if(now > reset){
 reset.setDate(reset.getDate()+1)
 }
-
 const diff = Math.floor((reset - now)/1000)
-
 el.innerText = formatTime(diff)
-
 }
 
 updateResetTimer()
@@ -595,50 +588,124 @@ setInterval(updateResetTimer,1000)
 // fuction togle timer 
 
 function toggleTimer(index){
-
 const timer = timers[index]
-
 if(timer.running){
 
 // ставим на паузу
 clearInterval(timer.interval)
-
 timer.running = false
 timer.paused = true
-
 }else{
-
 timer.running = true
 timer.paused = false
-
 timer.interval = setInterval(()=>{
-
-if(timer.remaining<=0){
-
+if(timer.remaining <= 0){
 clearInterval(timer.interval)
-
-timer.running=false
-timer.paused=false
-
-alert("Таймер завершён: "+timer.name)
-
+timer.remaining = timer.duration
+timer.running = false
+timer.paused = false
 renderTimers()
 updateTimerStats()
+alert("Таймер завершён: " + timer.name)
 return
-
 }
-
 timer.remaining--
-
 const el=document.getElementById("time-"+index)
 if(el) el.innerText=formatTime(timer.remaining)
-
 saveTimers()
-
 },1000)
-
 }
-
 renderTimers()
+saveTimers()
+}
+
+
+// Сохранение всего 
+
+window.addEventListener("beforeunload",()=>{
+saveTasks()
+saveTimers()
+})
+setInterval(()=>{
+saveTasks()
+saveTimers()
+},2000)
+
+// загрузка состояния при старте
+
+async function loadAppState(){
+let data = await eel.load_state()()
+if(!data) return
+timers = data.timers || []
+taskState = data.tasks || taskState
+isVip = data.vip || false
+isX2 = data.x2 || false
+currentTab = data.tab || "solo"
+renderTasks(currentTab)
+renderTimers()
+updateBP()
+}
+
+// сохранение свсего состояния
+
+function saveAppState(){
+const state = {
+timers: timers,
+tasks: taskState,
+vip: isVip,
+x2: isX2,
+tab: currentTab
+}
+eel.save_state(state)
+}
+
+// автосохранение
+
+setInterval(()=>{
+saveAppState()
+},2000)
+
+// загрузка таймеров 
+
+async function loadTimers(){
+
+timers = await window.pywebview.api.load_timers()
 
 }
+
+function saveTimers(){
+
+window.pywebview.api.save_timers(timers)
+
+}
+
+function getAppState(){
+return {
+timers: timers,
+tasks: taskState,
+vip: isVip,
+x2: isX2,
+tab: currentTab
+}
+}
+
+function saveAppState(){
+window.pywebview.api.save_state(
+getAppState()
+)
+}
+
+async function loadAppState(){
+let data = await window.pywebview.api.load_state()
+if(!data) return
+timers = data.timers || []
+taskState = data.tasks || taskState
+isVip = data.vip || false
+isX2 = data.x2 || false
+currentTab = data.tab || "solo"
+}
+
+
+setInterval(()=>{
+saveAppState()
+},2000)

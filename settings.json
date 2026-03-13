@@ -1,4 +1,4 @@
 {
-    "overlay_enabled": false,
-    "overlay_position": "top-left"
+    "overlay_enabled": true,
+    "overlay_position": "top-right"
 }
